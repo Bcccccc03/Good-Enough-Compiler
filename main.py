@@ -4,7 +4,7 @@
 Good Enough Compiler - 主程序入口
 词法分析器系统的主要入口点
 """
-
+from ir_generator import IRGenerator  # 如果在 compiler 文件夹里则写 from compiler.ir_generator import IRGenerator
 import sys
 import os
 import argparse
@@ -189,6 +189,34 @@ end.
     print("已创建示例文件:")
     print("  - sample_code.pas: 示例Pascal代码")
     print("  - lexical_rules.txt: 词法规则文件")
+def run_ir_generation(code_file: str):
+    """模拟中间代码生成：目前用于测试 IRGenerator 输出"""
+
+    print(f"读取源代码文件: {code_file}")
+    try:
+        with open(code_file, 'r', encoding='utf-8') as f:
+            code = f.read()
+
+        print("✅ 成功读取源代码，现在生成中间代码...")
+
+        ir = IRGenerator()
+
+        # 示例中间代码生成（你之后会替换成真实语法分析语义动作生成）
+        t1 = ir.new_temp()
+        ir.gen('*', 'c', 'd', t1)
+
+        t2 = ir.new_temp()
+        ir.gen('+', 'b', t1, t2)
+
+        ir.gen(':=', t2, '-', 'a')
+
+        print("\n=== 中间代码（四元式） ===")
+        ir.print_ir()
+
+    except FileNotFoundError:
+        print(f"❌ 错误：找不到文件 {code_file}")
+    except Exception as e:
+        print(f"❌ 异常：{e}")
 
 def main():
     """主函数"""
@@ -205,7 +233,10 @@ def main():
     )
     
     subparsers = parser.add_subparsers(dest="command", help="可用命令")
-    
+    # 中间代码生成命令
+    ir_parser = subparsers.add_parser("ir", help="生成中间代码（四元式）")
+    ir_parser.add_argument("file", help="输入的源代码文件")
+
     # GUI命令
     gui_parser = subparsers.add_parser("gui", help="启动Web图形界面")
     
@@ -231,6 +262,8 @@ def main():
         run_regex_test(args.pattern)
     elif args.command == "create-samples":
         create_sample_files()
+    elif args.command == "ir":
+        run_ir_generation(args.file)
     else:
         # 默认启动GUI
         print("未指定命令，启动Web界面...")
